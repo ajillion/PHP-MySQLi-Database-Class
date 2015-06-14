@@ -18,6 +18,8 @@ MysqliDb -- Simple MySQLi wrapper and object mapper with prepared statements
 **[Subqueries](#subqueries)**  
 **[EXISTS / NOT EXISTS condition](#exists--not-exists-condition)**  
 **[Has method](#has-method)**  
+**[Define return type](#define-return-type)**  
+**[Headers Columns](#headers-columns)**  
 **[Helper Functions](#helper-commands)**  
 **[Transaction Helpers](#transaction-helpers)**  
 
@@ -281,7 +283,7 @@ Or raw condition with variables:
 $db->where ("(id = ? or id = ?)", Array(6,2));
 $db->where ("login","mike")
 $res = $db->get ("users");
-// Gives: SELECT * FROM users WHERE (id = 2 or id = 2) and login='mike';
+// Gives: SELECT * FROM users WHERE (id = 6 or id = 2) and login='mike';
 ```
 
 
@@ -446,6 +448,41 @@ if($db->has("users")) {
     return "Wrong user/password";
 }
 ``` 
+### Define return type
+You can easily define if the result should be return as an Array or an Object with the setReturnType() function.
+```php
+$db->setReturnType('Array');
+$db->where('id', 1);
+$results = $db->get('users', null, 'id');
+// Gives : Array ( [id] => 1 ) 
+// echo $results['id'];
+
+db->setReturnType('Object');
+$db->where('id', 1);
+$results = $db->get('users', null, 'id');
+ // Gives : stdClass Object ( [id] => 1 )
+ // echo $results->id;
+``` 
+
+### Headers Columns
+You can give userfriendly column names in your query, and display them using the getLastQueryHeaders() function
+```php
+$db->setReturnType('Array');
+$cols = Array ("id as 'my user ID'", "name as 'LAST NAME'", "email as 'EMAIL'");
+$users = $db->get ("users", null, $cols);
+if ($db->count > 0)
+    print_r ($db->getLastQueryHeaders());
+    foreach ($users as $user) { 
+        print_r ($user);
+    }
+
+// Gives : 
+// Array ( [0] => my user ID  [1] => LAST NAME [2] => EMAIL ) 
+// Array ( [0] => Array ( [my user ID] => 1 [LAST NAME] => toto  [EMAIL] => toto@toto.fr ) )
+
+``` 
+
+
 ### Helper commands
 Reconnect in case mysql connection died
 ```php
